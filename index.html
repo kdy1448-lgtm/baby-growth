@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리 아기 성장 백분위 체크</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF3F1; --card:#FFFFFF; --ink:#1E2A2D; --muted:#66777A; --line:#D6E0DD;
+  --accent:#1E6F6A; --accent-soft:#DCEDEA; --dot:#E8833A;
+  --band-o:#EBF2F0; --band-m:#DAEAE5; --band-i:#C3DFD8;
+  --ok:#1E6F6A; --ok-bg:#DCEDEA; --mid:#6E6420; --mid-bg:#F2EFD9; --warn:#A8531A; --warn-bg:#FBE8D8;
+  --boy:#3E7CB1; --girl:#C2577E;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121819; --card:#1A2325; --ink:#E4ECEA; --muted:#93A3A0; --line:#2B3739;
+    --accent:#62BDB4; --accent-soft:#1D3533; --dot:#F29A55;
+    --band-o:#1A2527; --band-m:#1F3133; --band-i:#264143;
+    --ok:#62BDB4; --ok-bg:#1D3533; --mid:#D9CB7A; --mid-bg:#2D2B1D; --warn:#F0A766; --warn-bg:#36271B;
+    --boy:#7FAEDB; --girl:#E58DAE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121819; --card:#1A2325; --ink:#E4ECEA; --muted:#93A3A0; --line:#2B3739;
+  --accent:#62BDB4; --accent-soft:#1D3533; --dot:#F29A55;
+  --band-o:#1A2527; --band-m:#1F3133; --band-i:#264143;
+  --ok:#62BDB4; --ok-bg:#1D3533; --mid:#D9CB7A; --mid-bg:#2D2B1D; --warn:#F0A766; --warn-bg:#36271B;
+  --boy:#7FAEDB; --girl:#E58DAE;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:28px 18px 48px}
+header h1{font-family:"Gowun Dodum","Noto Sans KR",sans-serif;font-weight:400;font-size:30px;line-height:1.25;margin:0 0 8px;letter-spacing:-0.5px}
+header p{margin:0;color:var(--muted);font-size:15px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:20px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label.lbl{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+.seg{display:flex;gap:6px;background:var(--bg);padding:4px;border-radius:12px}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-size:15px;font-weight:500;padding:9px 0;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.seg button[data-sex="boy"][aria-pressed="true"]{color:var(--boy)}
+.seg button[data-sex="girl"][aria-pressed="true"]{color:var(--girl)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+input{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 11px;min-width:0}
+input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.unit{position:relative}
+.unit span{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.unit input{padding-right:38px}
+.sub{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+.go{width:100%;border:0;background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:16px;padding:14px;border-radius:12px;cursor:pointer;margin-top:4px}
+:root[data-theme="dark"] .go{color:#0E1F1E}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .go{color:#0E1F1E}}
+.go:focus-visible,.seg button:focus-visible,.tabs button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.err{color:var(--warn);font-size:14px;margin-top:10px;min-height:0}
+#result{display:none}
+.calc{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px;color:var(--muted);padding-bottom:12px;margin-bottom:12px;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.calc .v{color:var(--ink);text-align:right}
+.age{font-family:"Gowun Dodum","Noto Sans KR",sans-serif;font-size:22px;margin:0}
+.age-note{color:var(--muted);font-size:14px;margin:2px 0 0}
+.metric{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+.m-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.m-name{font-size:15px;font-weight:500}
+.m-val{color:var(--muted);font-size:14px}
+.pct{display:flex;align-items:baseline;gap:8px;margin:6px 0 2px}
+.pct b{font-family:"Gowun Dodum","Noto Sans KR",sans-serif;font-weight:400;font-size:44px;line-height:1}
+.pct small{font-size:15px;color:var(--muted)}
+.badge{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px}
+.ok{color:var(--ok);background:var(--ok-bg)} .mid{color:var(--mid);background:var(--mid-bg)} .warn{color:var(--warn);background:var(--warn-bg)}
+.gauge{position:relative;height:10px;border-radius:5px;margin:14px 0 6px;
+  background:linear-gradient(90deg,var(--warn-bg) 0 3%,var(--mid-bg) 3% 10%,var(--band-m) 10% 25%,var(--ok-bg) 25% 75%,var(--band-m) 75% 90%,var(--mid-bg) 90% 97%,var(--warn-bg) 97% 100%)}
+.gauge i{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--dot);border:3px solid var(--card);transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.g-scale{position:relative;height:14px;font-size:10px;color:var(--muted)}
+.g-scale span{position:absolute;transform:translateX(-50%)}
+.m-pos{font-size:14px;margin:8px 0 0;font-variant-numeric:tabular-nums}
+.m-msg{font-size:14px;margin:10px 0 0}
+.m-ref{font-size:13px;color:var(--muted);margin:4px 0 0}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:14px;padding:6px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.chart-box{width:100%}
+.chart-box svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:14px;height:10px;border-radius:2px;display:inline-block}
+.c-band-o{fill:var(--band-o)} .c-band-m{fill:var(--band-m)} .c-band-i{fill:var(--band-i)}
+.c-pl{stroke:var(--muted);stroke-width:.8;fill:none;opacity:.55}
+.c-plbl{fill:var(--muted);font-size:9px;font-family:"Noto Sans KR",sans-serif}
+.c-grid{stroke:var(--line);stroke-width:1}
+.c-p50{stroke:var(--accent);stroke-width:2;fill:none}
+.c-edge{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;fill:none;opacity:.7}
+.c-txt{fill:var(--muted);font-size:10px;font-family:"Noto Sans KR",sans-serif}
+.c-dot{fill:var(--dot);stroke:var(--card);stroke-width:2.5}
+.c-dotlbl{fill:var(--ink);font-size:11px;font-weight:700;font-family:"Noto Sans KR",sans-serif}
+details{margin-top:16px}
+summary{cursor:pointer;font-size:14px;font-weight:500}
+.tbl-wrap{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:500}
+td.p50{font-weight:700;color:var(--accent)}
+tr.hl td{background:var(--accent-soft)}
+.guide{font-size:14px;color:var(--muted)}
+.guide p{margin:0 0 8px}
+footer{font-size:12px;color:var(--muted);margin-top:24px;line-height:1.7}
+@media (max-width:380px){.row3{grid-template-columns:1fr 1fr}.pct b{font-size:38px}}
+@media (prefers-reduced-motion:no-preference){#result.show{animation:rise .35s ease-out}@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>우리 아기, 또래 중에<br>어디쯤 크고 있을까?</h1>
+    <p>몸무게·키·머리둘레를 넣으면 WHO 성장표 기준 백분위를 바로 보여드려요. 영유아검진·방문간호에서 쓰는 표와 같은 기준이에요.</p>
+  </header>
+
+  <section class="panel" aria-label="정보 입력">
+    <div class="field">
+      <label class="lbl">성별</label>
+      <div class="seg" role="group" aria-label="성별">
+        <button type="button" data-sex="boy" aria-pressed="true">남아</button>
+        <button type="button" data-sex="girl" aria-pressed="false">여아</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">날짜</label>
+      <div class="row">
+        <div><span class="sub">생년월일</span><input type="date" id="birth"></div>
+        <div><span class="sub">기준일 (오늘)</span><input type="date" id="measured"></div>
+      </div>
+      <div class="hint">생리적 나이를 자동으로 계산해요. 한 달은 30일, 16일부터는 다음 달로 평가해요. 지난 검진 기록을 넣을 땐 기준일을 그날로 바꿔 주세요.</div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">측정값 <span style="color:var(--muted);font-weight:400">(아는 것만 입력해도 돼요)</span></label>
+      <div class="row3">
+        <div><span class="sub">몸무게</span><div class="unit"><input type="number" id="w" inputmode="decimal" step="0.01" placeholder="5.2"><span>kg</span></div></div>
+        <div><span class="sub">키</span><div class="unit"><input type="number" id="h" inputmode="decimal" step="0.1" placeholder="57.5"><span>cm</span></div></div>
+        <div><span class="sub">머리둘레</span><div class="unit"><input type="number" id="c" inputmode="decimal" step="0.1" placeholder="38.0"><span>cm</span></div></div>
+      </div>
+    </div>
+
+    <button type="button" class="go" id="go">백분위 확인하기</button>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+
+  <section class="panel" id="result" aria-live="polite">
+    <div class="calc" id="calc"></div>
+    <p class="age" id="ageTxt"></p>
+    <p class="age-note" id="ageNote"></p>
+    <div id="metrics"></div>
+  </section>
+
+  <section class="panel" aria-label="성장 곡선">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-k="w" aria-selected="true">몸무게</button>
+      <button role="tab" data-k="h" aria-selected="false">키</button>
+      <button role="tab" data-k="c" aria-selected="false">머리둘레</button>
+    </div>
+    <div class="chart-box" id="chart"></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--band-i)"></i>25~75 평균</span>
+      <span><i class="sw" style="background:var(--band-m)"></i>10~90</span>
+      <span><i class="sw" style="background:var(--band-o)"></i>3~97 정상 범위</span>
+      <span><i class="sw" style="background:var(--dot);border-radius:50%;width:10px"></i>우리 아기</span>
+    </div>
+    <details>
+      <summary id="tblTitle">개월별 표 보기</summary>
+      <div class="tbl-wrap"><table id="tbl"></table></div>
+    </details>
+  </section>
+
+  <section class="panel guide">
+    <p><b style="color:var(--ink)">백분위 읽는 법</b></p>
+    <p>백분위 30이면 같은 개월 수 아기 100명을 작은 순서로 세웠을 때 30번째쯤이라는 뜻이에요.</p><p>3~97이 의학적인 정상 범위라 넓어 보이지만, 그 안에서도 25~75면 딱 평균, 10~25·75~90이면 조금 작거나 큰 편, 3~10·90~97이면 작거나 큰 편으로 나눠서 보여드려요.</p>
+    <p>한 번 잰 숫자보다 아기가 자기 곡선을 따라 꾸준히 크는지가 더 중요해요. 백분위 선을 두 칸 이상 갑자기 넘나들거나 3 미만, 97 초과가 이어지면 소아청소년과에서 확인해 보세요.</p>
+  </section>
+
+  <footer>
+    기준: WHO Child Growth Standards(2006). 질병관리청·대한소아과학회 2017 소아청소년 성장도표도 0~35개월은 이 기준을 그대로 써요. 이 페이지는 참고용이며 의학적 진단을 대신하지 않아요.
+  </footer>
+</div>
+
+<script>
+// WHO LMS (0~24개월). 몸무게 [L,M,S]
+const W={boy:[[0.3487,3.3464,0.14602],[0.2297,4.4709,0.13395],[0.1970,5.5675,0.12385],[0.1738,6.3762,0.11727],[0.1553,7.0023,0.11316],[0.1395,7.5105,0.1108],[0.1257,7.934,0.10958],[0.1134,8.297,0.10902],[0.1021,8.6151,0.10882],[0.0917,8.9014,0.10881],[0.082,9.1649,0.10891],[0.073,9.4122,0.10906],[0.0644,9.6479,0.10925],[0.0563,9.8749,0.10949],[0.0487,10.0953,0.10976],[0.0413,10.3108,0.11007],[0.0343,10.5228,0.11041],[0.0275,10.7319,0.11079],[0.0211,10.9385,0.11119],[0.0148,11.143,0.11164],[0.0087,11.3462,0.11211],[0.0029,11.5486,0.11261],[-0.0028,11.7504,0.11314],[-0.0083,11.9514,0.11369],[-0.0137,12.1515,0.11426]],
+girl:[[0.3809,3.2322,0.14171],[0.1714,4.1873,0.13724],[0.0962,5.1282,0.13],[0.0402,5.8458,0.12619],[-0.005,6.4237,0.12402],[-0.043,6.8985,0.12274],[-0.0756,7.297,0.12204],[-0.1039,7.6422,0.12178],[-0.1288,7.9487,0.12181],[-0.1507,8.2254,0.12199],[-0.17,8.48,0.12223],[-0.1872,8.7192,0.12247],[-0.2024,8.9481,0.12268],[-0.2158,9.1699,0.12283],[-0.2278,9.387,0.12294],[-0.2384,9.6008,0.12299],[-0.2478,9.8124,0.12303],[-0.2562,10.0226,0.12306],[-0.2637,10.2315,0.12309],[-0.2703,10.4393,0.12315],[-0.2762,10.6464,0.12323],[-0.2815,10.8534,0.12335],[-0.2862,11.0608,0.1235],[-0.2903,11.2688,0.12369],[-0.2941,11.4775,0.1239]]};
+// 키, 머리둘레: L=1 → [M,S]
+const HM={boy:[49.9,54.7,58.4,61.4,63.9,65.9,67.6,69.2,70.6,72.0,73.3,74.5,75.7,76.9,78.0,79.1,80.2,81.2,82.3,83.2,84.2,85.1,86.0,86.9,87.8],
+girl:[49.1,53.7,57.1,59.8,62.1,64.0,65.7,67.3,68.7,70.1,71.5,72.8,74.0,75.2,76.4,77.5,78.6,79.7,80.7,81.7,82.7,83.7,84.6,85.5,86.4]};
+const HS={boy:[0.03795,0.03557,0.03424,0.03328,0.03257,0.03204,0.03165,0.03139,0.03124,0.03117,0.03118,0.03125,0.03137,0.03154,0.03174,0.03197,0.03222,0.0325,0.03279,0.0331,0.03342,0.03376,0.0341,0.03445,0.03479],
+girl:[0.0379,0.0364,0.03568,0.0352,0.03486,0.03463,0.03448,0.03441,0.0344,0.03444,0.03452,0.03464,0.03479,0.03496,0.03514,0.03534,0.03555,0.03576,0.03598,0.0362,0.03643,0.03666,0.03688,0.03711,0.03734]};
+const CM={boy:[34.4618,37.2759,39.1285,40.5135,41.6317,42.5576,43.3306,43.9803,44.53,44.9998,45.4051,45.7573,46.0661,46.3395,46.5844,46.806,47.0088,47.1962,47.3711,47.5357,47.6919,47.8408,47.9833,48.1201,48.2515],
+girl:[33.8787,36.5463,38.2521,39.5328,40.5817,41.459,42.1995,42.829,43.3671,43.83,44.2319,44.5844,44.8965,45.1752,45.4265,45.6551,45.865,46.0598,46.2424,46.4152,46.5801,46.7384,46.8913,47.0391,47.1822]};
+const CS={boy:[0.03686,0.03133,0.02997,0.02918,0.02868,0.02837,0.02817,0.02804,0.02796,0.02792,0.0279,0.02789,0.02789,0.02789,0.02791,0.02792,0.02795,0.02797,0.028,0.02803,0.02806,0.0281,0.02813,0.02817,0.02821],
+girl:[0.03496,0.0321,0.03168,0.0314,0.03119,0.03102,0.03087,0.03075,0.03063,0.03053,0.03044,0.03035,0.03027,0.03019,0.03012,0.03006,0.03,0.02994,0.02989,0.02984,0.0298,0.02976,0.02973,0.0297,0.02967]};
+const toLMS=(M,S)=>({boy:M.boy.map((m,i)=>[1,m,S.boy[i]]),girl:M.girl.map((m,i)=>[1,m,S.girl[i]])});
+const DATA={w:W,h:toLMS(HM,HS),c:toLMS(CM,CS)};
+const META={w:{name:'몸무게',unit:'kg',dp:1,yr:[2,17],step:2,min:1,max:30},h:{name:'키',unit:'cm',dp:1,yr:[44,98],step:10,min:35,max:120},c:{name:'머리둘레',unit:'cm',dp:1,yr:[30,52],step:4,min:25,max:60}};
+const Zp={1:-2.3263,3:-1.8808,5:-1.6449,10:-1.2816,15:-1.0364,25:-0.6745,50:0,75:0.6745,85:1.0364,90:1.2816,95:1.6449,97:1.8808,99:2.3263};
+const COLS=[1,3,5,10,15,25,50,75,85,90,95,97,99];
+
+function lmsAt(arr,a){a=Math.max(0,Math.min(24,a));const i=Math.min(23,Math.floor(a)),f=a-i;return arr[i].map((v,k)=>v+(arr[i+1][k]-v)*f);}
+function zOf(x,[L,M,S]){return Math.abs(L)<1e-6?Math.log(x/M)/S:(Math.pow(x/M,L)-1)/(L*S);}
+function valOf(z,[L,M,S]){return Math.abs(L)<1e-6?M*Math.exp(S*z):M*Math.pow(1+L*S*z,1/L);}
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));}
+const cdf=z=>0.5*(1+erf(z/Math.SQRT2));
+
+const state={sex:'boy',tab:'w',res:null};
+const $=id=>document.getElementById(id);
+
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseD(s){const [y,m,d]=s.split('-').map(Number);return {y,m,d};}
+
+function judge(p){
+  const chk='한 번 잰 값만으로 판단하긴 어려우니 다음 검진 때나 소아청소년과에서 한번 확인해 보세요.';
+  const keep='정상 범위 안이에요. 지난번과 비슷한 곡선을 따라 크고 있다면 괜찮아요.';
+  if(p<3)  return ['warn','많이 작은 편','또래 100명 중 가장 작은 3명 안쪽이에요. '+chk];
+  if(p<10) return ['mid','작은 편',keep];
+  if(p<25) return ['ok','평균보다 조금 작은 편',keep];
+  if(p<=75)return ['ok','딱 평균','또래 아기들 한가운데(25~75)에서 잘 크고 있어요.'];
+  if(p<=90)return ['ok','평균보다 조금 큰 편',keep];
+  if(p<=97)return ['mid','큰 편',keep];
+  return ['warn','많이 큰 편','또래 100명 중 가장 큰 3명 안쪽이에요. '+chk];
+}
+function posText(x,lms,mt){
+  const u=mt.unit,v=c=>valOf(Zp[c],lms).toFixed(mt.dp);
+  if(x<valOf(Zp[1],lms)) return `표 기준 1백분위(${v(1)}${u})보다 작아요`;
+  if(x>valOf(Zp[99],lms)) return `표 기준 99백분위(${v(99)}${u})보다 커요`;
+  for(let i=0;i<COLS.length-1;i++){const a=COLS[i],b=COLS[i+1];
+    if(x<=valOf(Zp[b],lms)) return `표에서 <b>${a}~${b}백분위 사이</b> (${v(a)}~${v(b)}${u})`;}
+  return '';
+}
+function fmtP(p){if(p<1)return '1 미만';if(p>99)return '99 초과';return String(Math.round(p));}
+
+function run(){
+  const err=$('err');err.textContent='';
+  const bs=$('birth').value,ts=$('measured').value;
+  if(!bs){err.textContent='생년월일을 입력해 주세요.';return;}
+  if(!ts){err.textContent='기준일을 입력해 주세요.';return;}
+  const b=parseD(bs),t=parseD(ts);
+  if(Date.UTC(t.y,t.m-1,t.d)<Date.UTC(b.y,b.m-1,b.d)){err.textContent='기준일이 생년월일보다 빨라요. 날짜를 확인해 주세요.';return;}
+  // 생리적 나이: 오늘날짜 - 생년월일, 한 달은 30일로 계산
+  let y=t.y-b.y,m=t.m-b.m,d=t.d-b.d;
+  if(d<0){d+=30;m--;}
+  if(m<0){m+=12;y--;}
+  const mo=y*12+m;
+  // 15일까지는 그 달, 16일부터는 다음 달로 평가
+  const evalAge=mo+(d>=16?1:0);
+  if(evalAge>24){err.textContent='만 2세(24개월)까지 확인할 수 있어요.';return;}
+  const f=o=>`${o.y}년 ${o.m}월 ${o.d}일`;
+  $('calc').innerHTML=`<span>기준일</span><span class="v">${f(t)}</span><span>− 생년월일</span><span class="v">${f(b)}</span>`;
+  const ageTxt=`생리적 나이 ${mo}개월 ${d}일`;
+  const ageNote=`→ ${evalAge}개월로 평가해요`+(d>=16?' (16일 이상이라 다음 달로 올림)':'');
+  try{localStorage.setItem('bg-birth',bs);localStorage.setItem('bg-sex',state.sex);}catch(e){}
+
+  const vals={};let any=false;
+  for(const k of ['w','h','c']){
+    const raw=$(k).value;if(raw==='')continue;
+    const x=Number(raw);const mt=META[k];
+    if(!(x>=mt.min&&x<=mt.max)){err.textContent=`${mt.name} 값을 다시 확인해 주세요 (${mt.min}~${mt.max}${mt.unit}).`;return;}
+    vals[k]=x;any=true;
+  }
+  if(!any){err.textContent='몸무게, 키, 머리둘레 중 하나 이상 입력해 주세요.';return;}
+
+  let html='';
+  for(const k of ['w','h','c']){
+    if(vals[k]===undefined)continue;
+    const mt=META[k],lms=lmsAt(DATA[k][state.sex],evalAge);
+    const p=cdf(zOf(vals[k],lms))*100;
+    const [cls,lab,msg]=judge(p);
+    const med=valOf(0,lms).toFixed(mt.dp),lo=valOf(Zp[3],lms).toFixed(mt.dp),hi=valOf(Zp[97],lms).toFixed(mt.dp);
+    const pos=Math.max(1,Math.min(99,p));const pos_txt=posText(vals[k],lms,mt);
+    html+=`<div class="metric">
+      <div class="m-head"><span class="m-name">${mt.name}</span><span class="m-val">${vals[k]}${mt.unit}</span></div>
+      <div class="pct"><b>${fmtP(p)}</b><small>백분위</small> <span class="badge ${cls}">${lab}</span></div>
+      <div class="gauge" aria-hidden="true"><i style="left:${pos}%"></i></div>
+      <div class="g-scale">${[3,10,25,50,75,90,97].map(v=>`<span style="left:${v}%">${v}</span>`).join("")}</div>
+      <p class="m-pos">${pos_txt}</p>
+      <p class="m-msg">${msg}</p>
+      <p class="m-ref">중앙값(50) ${med}${mt.unit} · 정상 범위(3~97) ${lo}~${hi}${mt.unit}</p>
+    </div>`;
+  }
+  $('ageTxt').textContent=ageTxt;$('ageNote').textContent=ageNote;$('metrics').innerHTML=html;
+  state.res={age:evalAge,vals};
+  const r=$('result');r.style.display='block';r.classList.remove('show');void r.offsetWidth;r.classList.add('show');
+  if(vals[state.tab]===undefined){const f=['w','h','c'].find(k=>vals[k]!==undefined);setTab(f);}else draw();
+  r.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+}
+
+function draw(){
+  const k=state.tab,mt=META[k],arr=DATA[k][state.sex];
+  const Wd=340,Ht=260,ml=34,mr=22,mt_=10,mb=26;
+  const X=a=>ml+a/24*(Wd-ml-mr);
+  const [y0,y1]=mt.yr;const Y=v=>mt_+(1-(v-y0)/(y1-y0))*(Ht-mt_-mb);
+  const ages=[];for(let a=0;a<=24.0001;a+=0.25)ages.push(a);
+  const pt=(z,a)=>X(a).toFixed(1)+' '+Y(valOf(z,lmsAt(arr,a))).toFixed(1);
+  const line=z=>ages.map((a,i)=>(i?'L':'M')+pt(z,a)).join('');
+  const band=(z1,z2)=>line(z2)+ages.slice().reverse().map(a=>'L'+pt(z1,a)).join('')+'Z';
+  let g='';
+  for(let v=y0;v<=y1;v+=mt.step){g+=`<line class="c-grid" x1="${ml}" x2="${Wd-mr}" y1="${Y(v)}" y2="${Y(v)}"/><text class="c-txt" x="${ml-5}" y="${Y(v)+3}" text-anchor="end">${v}</text>`;}
+  for(let a=0;a<=24;a+=3){g+=`<text class="c-txt" x="${X(a)}" y="${Ht-10}" text-anchor="middle">${a}</text>`;}
+  g+=`<text class="c-txt" x="${Wd-mr}" y="${Ht-1}" text-anchor="end">개월</text><text class="c-txt" x="2" y="${mt_+2}">${mt.unit}</text>`;
+  let s=`<path class="c-band-o" d="${band(Zp[3],Zp[97])}"/><path class="c-band-m" d="${band(Zp[10],Zp[90])}"/><path class="c-band-i" d="${band(Zp[25],Zp[75])}"/>${g}`;
+  for(const c of [3,10,25,75,90,97]) s+=`<path class="${c===3||c===97?'c-edge':'c-pl'}" d="${line(Zp[c])}"/>`;
+  s+=`<path class="c-p50" d="${line(0)}"/>`;
+  for(const c of [3,10,25,50,75,90,97]){const yy=Y(valOf(Zp[c],arr[24]));
+    s+=`<text class="c-plbl" x="${Wd-mr+3}" y="${yy+3}"${c===50?' style="fill:var(--accent);font-weight:700"':''}>${c}</text>`;}
+  const r=state.res;
+  if(r&&r.vals[k]!==undefined){
+    const cx=X(r.age),cy=Y(Math.max(y0,Math.min(y1,r.vals[k])));
+    const right=cx<Wd-100;
+    s+=`<circle class="c-dot" cx="${cx}" cy="${cy}" r="6"/><text class="c-dotlbl" x="${right?cx+10:cx-10}" y="${cy-9}" text-anchor="${right?'start':'end'}">${r.vals[k]}${mt.unit}</text>`;
+  }
+  $('chart').innerHTML=`<svg viewBox="0 0 ${Wd} ${Ht}" role="img" aria-label="${state.sex==='boy'?'남아':'여아'} ${mt.name} 성장 곡선">${s}</svg>`;
+  const hl=r&&r.vals[k]!==undefined?r.age:-1;
+  let t=`<tr><th>개월</th>${COLS.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  for(let m=0;m<=24;m++){const l=arr[m];
+    t+=`<tr${m===hl?' class="hl"':''}><td>${m}</td>`+COLS.map(c=>`<td${c===50?' class="p50"':''}>${valOf(Zp[c],l).toFixed(mt.dp)}</td>`).join('')+'</tr>';}
+  $('tbl').innerHTML=t;
+  $('tblTitle').textContent=`${state.sex==='boy'?'남아':'여아'} ${mt.name} 개월별 백분위 표 보기 (${mt.unit})`;
+}
+function setTab(k){state.tab=k;document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.k===k));draw();}
+
+document.querySelectorAll('[data-sex]').forEach(b=>b.onclick=()=>{state.sex=b.dataset.sex;document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',x===b));if(state.res)run();else draw();});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.k));
+$('go').onclick=run;
+document.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')run();}));
+$('measured').value=todayStr();
+try{const b=localStorage.getItem('bg-birth');if(b)$('birth').value=b;const sx=localStorage.getItem('bg-sex');if(sx==='girl')document.querySelector('[data-sex="girl"]').click();}catch(e){}
+draw();
+</script>
+</body>
+</html>
