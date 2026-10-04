@@ -87,6 +87,20 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
 .m-pos{font-size:14px;margin:8px 0 0;font-variant-numeric:tabular-nums}
 .m-msg{font-size:14px;margin:10px 0 0}
 .m-ref{font-size:13px;color:var(--muted);margin:4px 0 0}
+.m-diff{display:flex;align-items:center;gap:14px;margin:14px 0 4px;padding:14px 16px;border-radius:14px;border:2px solid var(--dc);background:var(--dbg)}
+.m-diff .dv{font-family:"Gowun Dodum","Noto Sans KR",sans-serif;font-size:34px;line-height:1;color:var(--dc);white-space:nowrap;font-variant-numeric:tabular-nums}
+.m-diff .dt{font-size:14px;line-height:1.45}
+.m-diff .dt b{display:block;font-size:16px}
+.m-diff .dt span{color:var(--muted);font-size:13px}
+.d-up{--dc:var(--dot);--dbg:var(--warn-bg)}
+.d-down{--dc:var(--boy);--dbg:color-mix(in srgb,var(--boy) 12%,var(--card))}
+.d-same{--dc:var(--accent);--dbg:var(--ok-bg)}
+.feed{border-top:1px solid var(--line);padding-top:16px;margin-top:16px;font-size:14px}
+.feed h3{font-size:15px;font-weight:700;margin:0 0 8px}
+.feed p{margin:0 0 8px}
+.feed .big{font-family:"Gowun Dodum","Noto Sans KR",sans-serif;font-size:26px;color:var(--accent);line-height:1.2;margin:2px 0 6px}
+.feed ul{margin:4px 0 0;padding-left:18px;color:var(--muted)}
+.feed li{margin-bottom:4px}
 .tabs{display:flex;gap:6px;margin-bottom:12px}
 .tabs button{border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:14px;padding:6px 14px;border-radius:999px;cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
@@ -285,15 +299,42 @@ function run(){
     const [cls,lab,msg]=judge(p);
     const med=valOf(0,lms).toFixed(mt.dp),lo=valOf(Zp[3],lms).toFixed(mt.dp),hi=valOf(Zp[97],lms).toFixed(mt.dp);
     const pos=Math.max(1,Math.min(99,p));const pos_txt=posText(vals[k],lms,mt);
+    let diff_html='';
+    if(k==='w'){const medv=valOf(0,lms),dkg=vals.w-medv,g=Math.round(Math.abs(dkg)*1000/10)*10;
+      const same=g<100,cls=same?'d-same':(dkg<0?'d-down':'d-up');
+      const big=same?'±0':(dkg<0?'−':'+')+g.toLocaleString()+'g';
+      const word=same?'50백분위와 거의 같아요':`50백분위보다 ${g.toLocaleString()}g ${dkg<0?'가벼워요':'무거워요'}`;
+      diff_html=`<div class="m-diff ${cls}"><div class="dv">${big}</div><div class="dt"><b>${word}</b><span>50백분위(중앙값) ${medv.toFixed(1)}kg · 우리 아기 ${vals.w}kg</span></div></div>`;}
     html+=`<div class="metric">
       <div class="m-head"><span class="m-name">${mt.name}</span><span class="m-val">${vals[k]}${mt.unit}</span></div>
       <div class="pct"><b>${fmtP(p)}</b><small>백분위</small> <span class="badge ${cls}">${lab}</span></div>
+      ${diff_html}
       <div class="gauge" aria-hidden="true"><i style="left:${pos}%"></i></div>
       <div class="g-scale">${[3,10,25,50,75,90,97].map(v=>`<span style="left:${v}%">${v}</span>`).join("")}</div>
       <p class="m-pos">${pos_txt}</p>
       <p class="m-msg">${msg}</p>
       <p class="m-ref">중앙값(50) ${med}${mt.unit} · 정상 범위(3~97) ${lo}~${hi}${mt.unit}</p>
     </div>`;
+  }
+  if(vals.w!==undefined){
+    const signs=`<ul>
+        <li>예전 측정보다 백분위 선을 2칸 이상 내려왔어요 (예: 50 → 15)</li>
+        <li>생후 2주가 지났는데 출생 체중을 회복하지 못했어요</li>
+        <li>소변 기저귀가 하루 6개보다 적어요</li>
+        <li>3백분위 미만이거나, 반대로 선을 2칸 이상 빠르게 올라가고 있어요</li>
+      </ul>`;
+    if(evalAge<=6){
+      const daily=Math.min(1000,Math.round(vals.w*150/10)*10);
+      html+=`<div class="feed"><h3>수유량 참고</h3>
+        <p>분유 기준 하루 권장량 (체중 1kg당 약 150mL)</p>
+        <div class="big">약 ${daily.toLocaleString()}mL 전후</div>
+        <p>하루 1,000mL는 넘기지 않는 게 좋아요. 아기마다 먹는 양 차이가 커서 ±20% 정도는 흔해요. 모유 수유는 아기가 원할 때 먹이는 게 기본이에요.</p>
+        <p>50백분위에 맞추려고 양을 바로 늘리거나 줄이기보다, 아기가 자기 곡선을 따라 크는지 먼저 보세요. 아래 신호가 있으면 소아청소년과와 상의해서 수유량을 조절하는 게 안전해요.</p>${signs}</div>`;
+    }else{
+      html+=`<div class="feed"><h3>수유량 참고</h3>
+        <p>6개월 이후에는 이유식이 늘면서 분유·모유량이 줄어드는 게 자연스러워요. 이 시기 수유량은 이유식 양과 함께 보고 정하는 게 좋아요.</p>
+        <p>50백분위에 맞추려고 양을 조절하기보다 자기 곡선을 따라 크는지 먼저 보세요. 아래 신호가 있으면 소아청소년과와 상의해 보세요.</p>${signs}</div>`;
+    }
   }
   $('ageTxt').textContent=ageTxt;$('ageNote').textContent=ageNote;$('metrics').innerHTML=html;
   state.res={age:evalAge,vals};
